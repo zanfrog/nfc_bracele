@@ -612,16 +612,29 @@
   };
   let guidancePoolCache = null;
 
-  async function fetchGuidancePool(){
-    if(guidancePoolCache) return guidancePoolCache;
-    try{
-      const data = await fetch('guidance.json').then(r=>r.json());
-      guidancePoolCache = data;
-    }catch(e){
-      guidancePoolCache = guidanceFallback;
-    }
-    return guidancePoolCache;
+// 分別去讀取你建立的四個 JSON 檔案
+async function fetchGuidancePool(){
+  if(guidancePoolCache) return guidancePoolCache;
+  try {
+    const [studyData, workData, loveData, wealthData] = await Promise.all([
+      fetch('study.json').then(r=>r.json()).catch(()=>[]),
+      fetch('work.json').then(r=>r.json()).catch(()=>[]),
+      fetch('love.json').then(r=>r.json()).catch(()=>[]),
+      fetch('wealth.json').then(r=>r.json()).catch(()=>[])
+    ]);
+
+    // 將抓回來的資料，轉換成純文字陣列，符合程式原本需要的結構
+    guidancePoolCache = {
+      study: studyData.map(item => item.text),
+      work: workData.map(item => item.text),
+      love: loveData.map(item => item.text),
+      wealth: wealthData.map(item => item.text)
+    };
+  } catch(e) {
+    guidancePoolCache = guidanceFallback;
   }
+  return guidancePoolCache;
+}
 
   const guidanceAnswer = document.getElementById('guidance-answer');
   const guidanceAnswerTag = document.getElementById('guidance-answer-tag');
