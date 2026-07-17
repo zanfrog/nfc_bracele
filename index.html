@@ -604,37 +604,29 @@
 
   // ---------- 四方指引 ----------
   const guidanceLabels = { study:'學業指引', work:'工作指引', love:'愛情指引', wealth:'財富指引' };
+  // 每個分類各自的 json 檔案（格式：[{ "category":"study", "text":"..." }, ...]）
+  // 檔案需與 index.html 放在同一個資料夾：study.json / work.json / love.json / wealth.json
   const guidanceFallback = {
     study: ["星象顯示，你的專注力正在回升，這幾天適合重新排定讀書計畫", "困住你的不是題目本身，而是還沒找到適合自己的節奏，慢慢調整就好"],
     work: ["你準備的比自己以為的還要充分，面試或簡報時放膽展現真實的自己", "近期適合主動出擊，被動等待反而會錯過機會"],
     love: ["感情裡的沉默不代表結束，找個時間好好把話說開吧", "先把自己照顧好，對的人自然會被你的狀態吸引"],
     wealth: ["這陣子不適合衝動消費，但小額投資自己（課程、書籍）會有回報", "意外之財有機會出現，但記得留一部分給未來的自己"]
   };
-  let guidancePoolCache = null;
+  const guidancePoolCache = {};
 
-// 分別去讀取你建立的四個 JSON 檔案
-async function fetchGuidancePool(){
-  if(guidancePoolCache) return guidancePoolCache;
-  try {
-    const [studyData, workData, loveData, wealthData] = await Promise.all([
-      fetch('study.json').then(r=>r.json()).catch(()=>[]),
-      fetch('work.json').then(r=>r.json()).catch(()=>[]),
-      fetch('love.json').then(r=>r.json()).catch(()=>[]),
-      fetch('wealth.json').then(r=>r.json()).catch(()=>[])
-    ]);
-
-    // 將抓回來的資料，轉換成純文字陣列，符合程式原本需要的結構
-    guidancePoolCache = {
-      study: studyData.map(item => item.text),
-      work: workData.map(item => item.text),
-      love: loveData.map(item => item.text),
-      wealth: wealthData.map(item => item.text)
-    };
-  } catch(e) {
-    guidancePoolCache = guidanceFallback;
+  async function fetchGuidanceCategory(cat){
+    if(guidancePoolCache[cat]) return guidancePoolCache[cat];
+    try{
+      const data = await fetch(`${cat}.json`).then(r=>r.json());
+      const arr = Array.isArray(data)
+        ? data.map(item => (typeof item === 'string' ? item : item.text)).filter(Boolean)
+        : [];
+      guidancePoolCache[cat] = arr.length ? arr : guidanceFallback[cat];
+    }catch(e){
+      guidancePoolCache[cat] = guidanceFallback[cat];
+    }
+    return guidancePoolCache[cat];
   }
-  return guidancePoolCache;
-}
 
   const guidanceAnswer = document.getElementById('guidance-answer');
   const guidanceAnswerTag = document.getElementById('guidance-answer-tag');
@@ -660,8 +652,7 @@ async function fetchGuidancePool(){
       if(!guidanceToday || guidanceToday.date !== dateKey) guidanceToday = { date: dateKey };
 
       if(!guidanceToday[cat]){
-        const pool = await fetchGuidancePool();
-        const arr = pool[cat] && pool[cat].length ? pool[cat] : guidanceFallback[cat];
+        const arr = await fetchGuidanceCategory(cat);
         guidanceToday[cat] = arr[Math.floor(Math.random()*arr.length)];
         saveJSON('lb_guidance', guidanceToday);
       }
