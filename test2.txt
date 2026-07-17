@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>簪蛙&米蛙幸運手串</title>
+    <style>
+        /* 手機全螢幕佈局 */
+        body { 
+            margin: 0; padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background-size: cover; background-position: center;
+            transition: background 0.5s ease; 
+        }
+        
+        /* 玻璃質感卡片 */
+        .card { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); 
+            padding: 2rem 2rem 3rem 2rem; 
+            border-radius: 25px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            width: 80%; max-width: 350px; 
+            text-align: center;
+            min-height: 250px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 儀式感按鈕的樣式 */
+        .draw-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .draw-btn:active {
+            transform: scale(0.95); 
+            background: #1a252f;
+        }
+
+        #color-box { 
+            width: 70px; height: 70px; border-radius: 50%; 
+            margin: 15px auto; border: 3px solid white; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.3); 
+        }
+
+        .data { font-size: 1.2rem; font-weight: 700; margin: 12px 0; color: #2c3e50; }
+        .highlight-color { font-size: 1.3rem; font-weight: 900; color: #222222; }
+        .highlight-num { font-size: 1.8rem; font-weight: 900; color: #e74c3c; margin-left: 4px; }
+        #wish { font-size: 1rem; color: #555; line-height: 1.5; margin-top: 20px; }
+        h2 { font-size: 1.1rem; color: #7f8c8d; margin-bottom: 5px; width: 100%; }
+        
+        /* 結果區塊一開始先隱藏 */
+        #result-container { display: none; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 id="date-display">今日能量</h2>
+    <button id="draw-btn" class="draw-btn">✨ 點擊抽取今日能量 ✨</button>
+
+    <div id="result-container">
+        <div id="color-box"></div>
+        <div id="color-name" class="data">-</div>
+        <div id="number" class="data">-</div>
+        <p id="wish"></p>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 💡 已經修改為最乾淨的亂數抓圖法
+    // ==========================================
+    const totalPhotos = 100; // 請把這個數字改成你資料夾裡實際的照片總數！
+    const randomImgId = Math.floor(Math.random() * totalPhotos) + 1; 
+    document.body.style.backgroundImage = `url('background/bg${randomImgId}.png')`;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const date = now.getDate();
+    const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    const todayStr = `${month}月${date}日 ${days[now.getDay()]}`;
+    const dateKey = `${year}-${month}-${date}`; 
+
+    document.getElementById('date-display').innerText = todayStr;
+
+    // 2. 綁定按鈕點擊事件
+    document.getElementById('draw-btn').addEventListener('click', async function() {
+        if (navigator.vibrate) navigator.vibrate(200);
+
+        this.style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+
+        try {
+            let luckyData = null;
+            const savedData = localStorage.getItem('myLuckyBracelet');
+
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                if (parsedData.savedDate === dateKey) {
+                    luckyData = parsedData; 
+                }
+            }
+
+            if (!luckyData) {
+                const colors = await fetch('color.json').then(res => res.json());
+                const sentences = await fetch('sentence.json').then(res => res.json());
+
+                const newColor = colors[Math.floor(Math.random() * colors.length)];
+                const newSentence = sentences[Math.floor(Math.random() * sentences.length)];
+                const newNum = Math.floor(Math.random() * 99) + 1;
+
+                luckyData = {
+                    savedDate: dateKey,
+                    color: newColor,
+                    sentence: newSentence,
+                    num: newNum
+                };
+                localStorage.setItem('myLuckyBracelet', JSON.stringify(luckyData));
+            }
+
+            document.getElementById('color-box').style.backgroundColor = luckyData.color.hex;
+            document.getElementById('color-name').innerHTML = `幸運色：<span class="highlight-color">${luckyData.color.name}</span>`;
+            document.getElementById('number').innerHTML = `幸運號碼：<span class="highlight-num">${luckyData.num}</span>`;
+            document.getElementById('wish').innerText = "「" + luckyData.sentence.text + "」";
+
+        } catch (error) {
+            console.error("讀取失敗:", error);
+            document.getElementById('wish').innerText = "讀取資料時發生錯誤，請檢查檔案路徑。";
+        }
+    });
+</script>
+</body>
+</html>
