@@ -323,12 +323,115 @@
   .stat-card .stat-value{font-size:1.3rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;}
   .stat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 
+  /* ============================================
+     虛擬靈能串珠：14 顆一輪，集滿發光，長按 3 秒引爆並開啟新週期
+     ============================================ */
   .trend-label{font-size:0.62rem;letter-spacing:0.1em;color:var(--mist);margin-bottom:8px;}
-  .trend-row{display:flex;align-items:flex-end;gap:6px;height:90px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;}
-  .trend-bar{flex-shrink:0;width:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-  .trend-bar .bar{width:100%;background:var(--slate);border-radius:2px 2px 0 0;}
-  .trend-bar .bar.ssr{background:var(--ssr);}
-  .trend-bar .num{font-size:0.58rem;color:var(--mist);margin-top:3px;}
+  .bead-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
+  .bead-header .trend-label{margin-bottom:0;}
+  .bead-count-tag{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.06em;color:var(--gold);}
+
+  .bead-strand{
+    position:relative;padding:22px 6px 10px;border-radius:8px;
+    background:rgba(203,160,90,0.05);border:1px solid var(--hairline);
+    overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:pan-y;
+  }
+  .bead-thread{
+    position:absolute;left:16px;right:16px;top:38px;height:2px;z-index:1;
+    background:linear-gradient(90deg, rgba(203,160,90,0.1), rgba(203,160,90,0.55) 12%, rgba(203,160,90,0.55) 88%, rgba(203,160,90,0.1));
+    box-shadow:0 1px 1px rgba(0,0,0,0.15);
+  }
+  .bead-row{
+    position:relative;z-index:2;display:flex;align-items:center;gap:12px;
+    overflow-x:auto;overflow-y:visible;padding:6px 10px 10px;
+    scrollbar-width:none;      /* Firefox：隱藏捲軸但保留可滑動 */
+    -ms-overflow-style:none;   /* 舊版 Edge / IE */
+  }
+  .bead-row::-webkit-scrollbar{
+    display:none;              /* Chrome / Safari：徹底隱藏原生捲軸 */
+    width:0;height:0;
+  }
+
+  .bead{
+    position:relative;flex-shrink:0;width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif;font-size:0.6rem;font-weight:700;
+    z-index:2; /* 明確高於串線，確保珠子始終蓋在線的上面 */
+    box-shadow:
+      inset -3px -4px 6px rgba(0,0,0,0.38),      /* 右下暗部：珠體厚度感 */
+      inset 3px 3px 4px rgba(255,255,255,0.6),   /* 左上高光：琉璃反光 */
+      inset 0 0 0 1px rgba(255,255,255,0.1),     /* 邊緣細緻鑲邊 */
+      0 3px 5px rgba(0,0,0,0.35);                /* 落於線上的陰影，增加懸浮體積感 */
+  }
+  .bead::after{
+    content:'';position:absolute;top:4px;left:7px;width:9px;height:5px;
+    border-radius:50%;background:rgba(255,255,255,0.7);
+    filter:blur(1px);pointer-events:none;
+  }
+  .bead.ssr{
+    box-shadow:
+      inset -3px -4px 6px rgba(0,0,0,0.38),
+      inset 3px 3px 4px rgba(255,255,255,0.6),
+      inset 0 0 0 1px rgba(255,255,255,0.1),
+      0 3px 5px rgba(0,0,0,0.35),
+      0 0 0 2px var(--ssr), 0 0 8px 2px rgba(185,140,224,0.7);
+  }
+  .bead-slot{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px dashed var(--hairline);position:relative;z-index:2;}
+
+  .bead-strand.full .bead{animation:bead-glow 1.7s ease-in-out infinite;}
+  @keyframes bead-glow{
+    0%,100%{
+      filter:brightness(1);
+      box-shadow:
+        inset -3px -4px 6px rgba(0,0,0,0.38),
+        inset 3px 3px 4px rgba(255,255,255,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.1),
+        0 3px 5px rgba(0,0,0,0.35),
+        0 0 5px 1px rgba(255,255,255,0.5);
+    }
+    50%{
+      filter:brightness(1.15);
+      box-shadow:
+        inset -3px -4px 6px rgba(0,0,0,0.38),
+        inset 3px 3px 4px rgba(255,255,255,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.1),
+        0 3px 5px rgba(0,0,0,0.35),
+        0 0 14px 4px rgba(255,255,255,0.9);
+    }
+  }
+
+  .bead-burst-layer{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:visible;}
+  .bead-spark{
+    position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;
+    background:#FFF8EA;box-shadow:0 0 6px 2px rgba(255,248,234,0.9);
+    opacity:0;animation:spark-fly 750ms ease-out forwards;
+  }
+  @keyframes spark-fly{
+    0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}
+    100%{opacity:0;transform:translate(-50%,-50%) translate(var(--tx), var(--ty)) scale(0.3);}
+  }
+
+  .bead-hint{font-size:0.64rem;color:var(--mist);text-align:center;margin-top:8px;letter-spacing:0.02em;}
+  .bead-hint.ready{color:var(--gold);}
+
+  /* 長按 3 秒完成一輪的訊息 */
+  .bead-message-overlay{
+    position:fixed;inset:0;z-index:35;background:rgba(14,8,26,0.82);
+    display:flex;align-items:center;justify-content:center;padding:26px;
+    opacity:0;pointer-events:none;transition:opacity 0.4s ease;
+  }
+  .bead-message-overlay.show{opacity:1;pointer-events:auto;}
+  .bead-message-box{
+    background:var(--paper);border:1px solid rgba(203,160,90,0.5);border-radius:8px;
+    padding:30px 26px;max-width:300px;text-align:center;
+    transform:translateY(10px);opacity:0;transition:transform 0.4s ease, opacity 0.4s ease;
+  }
+  .bead-message-overlay.show .bead-message-box{transform:translateY(0);opacity:1;}
+  .bead-message-mark{font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.3em;color:var(--gold);margin-bottom:14px;}
+  .bead-message-text{
+    font-family:"標楷體","DFKai-SB","BiauKai","STKaiti","KaiTi",serif;
+    font-size:1.05rem;line-height:1.9;color:var(--ink);
+  }
 
   .reset-link{font-size:0.68rem;color:#B7554A;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font-family:'Noto Sans TC',sans-serif;margin-top:14px;display:block;}
 
@@ -525,10 +628,26 @@
       </div>
     </div>
 
-    <div class="trend-label">幸運數字趨勢（近期抽籤）</div>
-    <div class="trend-row" id="trend-row"></div>
+    <div class="bead-header">
+      <span class="trend-label">靈能串珠</span>
+      <span class="bead-count-tag" id="bead-count-tag">0 / 14</span>
+    </div>
+    <div class="bead-strand" id="bead-strand">
+      <div class="bead-thread"></div>
+      <div class="bead-row" id="bead-row"></div>
+      <div class="bead-burst-layer" id="bead-burst-layer"></div>
+    </div>
+    <p class="bead-hint" id="bead-hint">再抽 14 天集滿一輪能量</p>
 
     <button class="reset-link" id="reset-history-btn">清除本機紀錄</button>
+  </div>
+</div>
+
+<!-- 十四日週期完成訊息 -->
+<div class="bead-message-overlay" id="bead-message-overlay">
+  <div class="bead-message-box">
+    <div class="bead-message-mark">✦ ✦ ✦</div>
+    <div class="bead-message-text">十四日的沉澱已然熟透。<br>褪去舊的軀殼，帶著這份豐盛的能量，<br>開啟下一個全新的週期吧。</div>
   </div>
 </div>
 
@@ -577,6 +696,8 @@
 
   let history = loadJSON('lb_history', []);
   let guidanceToday = loadJSON('lb_guidance', null);
+  // 靈能串珠：獨立於總歷史紀錄，只保存「目前這一輪」最多 14 顆珠子
+  let cycleBeads = loadJSON('lb_cycle_beads', []);
 
   // ---------- DOM ----------
   const btn = document.getElementById('draw-btn');
@@ -880,6 +1001,11 @@
         if(history.length > 120) history = history.slice(-120);
         saveJSON('lb_history', history);
 
+        if(cycleBeads.length < 14){
+          cycleBeads.push({ date: dateKey, colorHex: newColor.hex, colorName: newColor.name, num: newNum, isSSR });
+          saveJSON('lb_cycle_beads', cycleBeads);
+        }
+
         return data;
       })();
 
@@ -1006,7 +1132,9 @@
   document.getElementById('reset-history-btn').addEventListener('click', ()=>{
     if(confirm('確定要清除本機累積的抽籤紀錄嗎？此動作無法復原。')){
       history = [];
+      cycleBeads = [];
       saveJSON('lb_history', history);
+      saveJSON('lb_cycle_beads', cycleBeads);
       renderDashboard();
     }
   });
@@ -1036,28 +1164,148 @@
       topColorEl.innerHTML = `<span class="stat-dot" style="background:#ccc;"></span>尚無紀錄`;
     }
 
-    const trendRow = document.getElementById('trend-row');
-    trendRow.innerHTML = '';
-    const recent = history.slice(-14);
-    if(recent.length === 0){
-      trendRow.innerHTML = '<div style="font-size:0.72rem;color:var(--mist);">還沒有抽籤紀錄，抽完今日能量後回來看看吧</div>';
+    renderBeadStrand();
+  }
+
+  // ---------- 虛擬靈能串珠 ----------
+  const beadStrandEl = document.getElementById('bead-strand');
+  const beadRowEl = document.getElementById('bead-row');
+  const beadBurstLayerEl = document.getElementById('bead-burst-layer');
+  const beadCountTagEl = document.getElementById('bead-count-tag');
+  const beadHintEl = document.getElementById('bead-hint');
+  const beadMessageOverlay = document.getElementById('bead-message-overlay');
+
+  // 依背景色亮度決定珠子上數字要用深色或淺色，確保可讀性
+  function beadTextColor(hex){
+    const c = (hex || '#CBA05A').replace('#','');
+    const r = parseInt(c.substring(0,2),16) || 0;
+    const g = parseInt(c.substring(2,4),16) || 0;
+    const b = parseInt(c.substring(4,6),16) || 0;
+    const brightness = (r*299 + g*587 + b*114) / 1000;
+    return brightness > 150 ? 'rgba(43,33,64,0.75)' : 'rgba(255,248,234,0.92)';
+  }
+
+  function renderBeadStrand(){
+    beadRowEl.innerHTML = '';
+    cycleBeads.forEach(b=>{
+      const bead = document.createElement('div');
+      bead.className = 'bead' + (b.isSSR ? ' ssr' : '');
+      bead.style.background = `radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85), ${b.colorHex} 40%, ${b.colorHex} 100%)`;
+      bead.style.color = beadTextColor(b.colorHex);
+      bead.innerText = b.num;
+      bead.title = `${b.date}．幸運色 ${b.colorName}．幸運號碼 ${b.num}`;
+      beadRowEl.appendChild(bead);
+    });
+    for(let i = cycleBeads.length; i < 14; i++){
+      const slot = document.createElement('div');
+      slot.className = 'bead-slot';
+      beadRowEl.appendChild(slot);
+    }
+
+    beadCountTagEl.innerText = `${cycleBeads.length} / 14`;
+
+    const isFull = cycleBeads.length >= 14;
+    beadStrandEl.classList.toggle('full', isFull);
+    if(isFull){
+      beadHintEl.textContent = '靈能已然滿溢，按住珠串 3 秒完成這一輪的沉澱';
+      beadHintEl.classList.add('ready');
     } else {
-      recent.forEach(h=>{
-        const wrap = document.createElement('div');
-        wrap.className = 'trend-bar';
-        const bar = document.createElement('div');
-        bar.className = 'bar' + (h.isSSR ? ' ssr' : '');
-        const pct = Math.max(6, Math.round((h.num/99)*100));
-        bar.style.height = pct + '%';
-        const numLabel = document.createElement('div');
-        numLabel.className = 'num';
-        numLabel.innerText = h.num;
-        wrap.appendChild(bar);
-        wrap.appendChild(numLabel);
-        trendRow.appendChild(wrap);
-      });
+      beadHintEl.textContent = `再抽 ${14 - cycleBeads.length} 天集滿一輪能量`;
+      beadHintEl.classList.remove('ready');
     }
   }
+
+  // 長按 3 秒：蓄能顫抖 -> 引爆散開星光 -> 顯示週期完成訊息 -> 重置新的一輪
+  let chargeRAF = null;
+  let chargeStart = 0;
+  let chargeActive = false;
+  const CHARGE_MS = 3000;
+
+  function stopCharging(){
+    chargeActive = false;
+    if(chargeRAF) cancelAnimationFrame(chargeRAF);
+    chargeRAF = null;
+    beadStrandEl.classList.remove('charging');
+    beadRowEl.style.transform = '';
+    beadRowEl.style.filter = '';
+  }
+
+  function startCharging(){
+    if(!beadStrandEl.classList.contains('full') || chargeActive) return;
+    chargeActive = true;
+    chargeStart = performance.now();
+    beadStrandEl.classList.add('charging');
+    if(navigator.vibrate) navigator.vibrate(15);
+
+    function tick(now){
+      if(!chargeActive) return;
+      const elapsed = now - chargeStart;
+      const t = Math.min(1, elapsed / CHARGE_MS);
+      const amp = t * 3.2;
+      const dx = (Math.random() - 0.5) * amp;
+      const dy = (Math.random() - 0.5) * amp;
+      beadRowEl.style.transform = `translate(${dx}px, ${dy}px)`;
+      beadRowEl.style.filter = `brightness(${1 + t * 0.5})`;
+
+      if(t >= 1){
+        chargeActive = false;
+        burstBeadCycle();
+        return;
+      }
+      chargeRAF = requestAnimationFrame(tick);
+    }
+    chargeRAF = requestAnimationFrame(tick);
+  }
+
+  function spawnBeadSparks(){
+    beadBurstLayerEl.innerHTML = '';
+    const count = 26;
+    for(let i = 0; i < count; i++){
+      const spark = document.createElement('span');
+      spark.className = 'bead-spark';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 60 + Math.random() * 90;
+      spark.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+      spark.style.left = (30 + Math.random()*40) + '%';
+      spark.style.animationDelay = (Math.random()*120) + 'ms';
+      beadBurstLayerEl.appendChild(spark);
+    }
+    setTimeout(()=>{ beadBurstLayerEl.innerHTML = ''; }, 950);
+  }
+
+  function burstBeadCycle(){
+    stopCharging();
+    if(navigator.vibrate) navigator.vibrate([40,30,60]);
+
+    beadRowEl.style.transition = 'opacity 300ms ease, transform 300ms ease';
+    beadRowEl.style.opacity = '0';
+    beadRowEl.style.transform = 'scale(0.85)';
+    spawnBeadSparks();
+
+    setTimeout(()=>{
+      // 開啟新的一輪
+      cycleBeads = [];
+      saveJSON('lb_cycle_beads', cycleBeads);
+      beadStrandEl.classList.remove('full');
+      beadRowEl.style.transition = '';
+      beadRowEl.style.opacity = '';
+      beadRowEl.style.transform = '';
+      renderBeadStrand();
+
+      beadMessageOverlay.classList.add('show');
+    }, 420);
+  }
+
+  function closeBeadMessage(){
+    beadMessageOverlay.classList.remove('show');
+  }
+
+  beadStrandEl.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startCharging(); });
+  beadStrandEl.addEventListener('pointerup', stopCharging);
+  beadStrandEl.addEventListener('pointerleave', stopCharging);
+  beadStrandEl.addEventListener('pointercancel', stopCharging);
+  beadMessageOverlay.addEventListener('click', closeBeadMessage);
 })();
 </script>
 </body>
