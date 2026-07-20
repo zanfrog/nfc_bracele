@@ -8,6 +8,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cinzel+Decorative:wght@700;900&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // 在畫面渲染前先套用已儲存的主題，避免載入時先閃一下錯誤的配色
+  (function(){
+    try{
+      if(localStorage.getItem('lb_theme') === 'light'){
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    }catch(e){}
+  })();
+</script>
 <style>
   :root{
     --ink:#2B2140;
@@ -20,6 +30,30 @@
     --ssr:#B98CE0;
     --hairline:rgba(43,33,64,0.18);
     --hairline-light:rgba(203,160,90,0.22);
+    --body-bg:radial-gradient(ellipse at 50% 0%, #2A1E4A 0%, #1B1233 45%, #0E0A1C 100%);
+    --header-text:#E7D9C2;
+    --icon-btn-bg:rgba(27,18,51,0.9);
+    --scrollbar-thumb:rgba(203,160,90,0.4);
+  }
+  /* ============================================
+     明亮溫暖風主題：覆寫同一組 CSS 變數即可全站換膚
+     切換方式：<html data-theme="light">（由 JS 依 localStorage 設定）
+     ============================================ */
+  :root[data-theme="light"]{
+    --ink:#4A3B2A;
+    --charcoal:#FBEFDA;
+    --charcoal-2:#F6E4C4;
+    --paper:#FFFDF8;
+    --mist:#A98F6B;
+    --slate:#C97B4A;
+    --gold:#B8823C;
+    --ssr:#9B6FCE;
+    --hairline:rgba(74,59,42,0.16);
+    --hairline-light:rgba(184,130,60,0.28);
+    --body-bg:radial-gradient(ellipse at 50% 0%, #FFF6E4 0%, #FDEEDA 45%, #F5E0BC 100%);
+    --header-text:#4A3B2A;
+    --icon-btn-bg:rgba(255,253,248,0.9);
+    --scrollbar-thumb:rgba(184,130,60,0.4);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;min-height:100%;}
@@ -27,7 +61,7 @@
     font-family:'Noto Sans TC',sans-serif;
     min-height:100vh;
     display:flex;justify-content:center;align-items:center;
-    background:radial-gradient(ellipse at 50% 0%, #2A1E4A 0%, #1B1233 45%, #0E0A1C 100%);
+    background:var(--body-bg);
     position:relative;overflow-x:hidden;
     padding:20px 16px 32px;
     transition:background 0.6s ease;
@@ -67,21 +101,25 @@
 
   .stage{position:relative;z-index:2;width:100%;max-width:340px;}
 
-  /* 右上角圖鑑icon */
+  /* 右上/右上角功能圖示列 */
   .icon-btn{
     position:fixed;top:16px;z-index:6;
     width:38px;height:38px;border-radius:50%;
-    background:rgba(27,18,51,0.9);border:1px solid var(--hairline-light);
+    background:var(--icon-btn-bg);border:1px solid var(--hairline-light);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     backdrop-filter:blur(6px);
+    transition:background 0.3s ease;
   }
   #dashboard-btn{right:16px;}
+  #theme-btn{right:64px;}
+  #calendar-btn{left:16px;}
+  #favorites-btn{left:64px;}
   .icon-btn svg{width:18px;height:18px;}
 
   .brandbar{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 18px;}
   .brandbar .rule-row{display:flex;align-items:center;gap:8px;}
   .brandbar .rule{height:1px;width:26px;background:var(--hairline-light);}
-  .brandbar span.brand-name{font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.22em;color:#E7D9C2;font-weight:600;white-space:nowrap;}
+  .brandbar span.brand-name{font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.22em;color:var(--header-text);font-weight:600;white-space:nowrap;}
   .brandbar span.brand-sub{font-family:'Cinzel',serif;font-size:0.56rem;letter-spacing:0.32em;color:var(--gold);opacity:0.8;}
 
   .panel{background:var(--paper);border:1px solid rgba(203,160,90,0.35);border-radius:8px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(203,160,90,0.12), 0 18px 40px rgba(0,0,0,0.45);}
@@ -97,7 +135,7 @@
   .panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--charcoal-2);border-bottom:1px solid var(--hairline-light);}
   .badge{width:34px;height:34px;border-radius:50%;background:var(--charcoal);border:1px solid rgba(203,160,90,0.5);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .badge svg{width:19px;height:19px;}
-  #date-display{font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;color:#E7D9C2;font-weight:500;margin:0;}
+  #date-display{font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;color:var(--header-text);font-weight:500;margin:0;}
   .spec-tag{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.14em;color:var(--gold);border:1px solid rgba(203,160,90,0.5);padding:3px 8px;border-radius:3px;}
   .spec-tag.ssr{color:var(--ssr);border-color:rgba(185,140,224,0.6);}
 
@@ -433,6 +471,63 @@
     font-size:1.05rem;line-height:1.9;color:var(--ink);
   }
 
+  /* ============================================
+     語錄收藏（愛心按鈕 + 我的收藏列表）
+     ============================================ */
+  .guidance-answer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .guidance-answer-head .guidance-answer-tag{margin-bottom:0;}
+  .fav-btn{background:none;border:none;padding:2px;cursor:pointer;color:var(--mist);display:flex;transition:color 0.2s ease, transform 0.15s ease;}
+  .fav-btn svg{width:18px;height:18px;}
+  .fav-btn:active{transform:scale(0.9);}
+  .fav-btn.active{color:#C0435B;}
+  .fav-btn.active svg{fill:currentColor;}
+
+  .fav-card{border:1px solid var(--hairline);border-radius:6px;padding:12px 14px;margin-bottom:10px;background:rgba(203,160,90,0.04);}
+  .fav-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .fav-card-tag{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;color:var(--gold);}
+  .fav-remove{background:none;border:none;font-size:0.66rem;color:#B7554A;text-decoration:underline;cursor:pointer;font-family:'Noto Sans TC',sans-serif;padding:0;}
+  .fav-card-text{
+    font-family:"標楷體","DFKai-SB","BiauKai","STKaiti","KaiTi",serif;
+    font-size:0.94rem;line-height:1.65;color:var(--ink);
+  }
+  .fav-empty{font-size:0.78rem;color:var(--mist);text-align:center;padding:24px 4px;}
+
+  /* ============================================
+     歷史運勢日曆
+     ============================================ */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .cal-nav-btn{background:none;border:1px solid var(--hairline);border-radius:4px;width:28px;height:28px;color:var(--ink);font-size:1rem;line-height:1;cursor:pointer;}
+  .cal-month-label{font-family:'Cinzel',serif;font-size:0.82rem;color:var(--ink);letter-spacing:0.04em;}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:0.62rem;color:var(--mist);margin-bottom:6px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-cell{
+    aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border-radius:6px;font-size:0.72rem;color:var(--ink);position:relative;gap:2px;
+  }
+  .cal-cell.empty{visibility:hidden;}
+  .cal-cell.has-record{cursor:pointer;border:1px solid var(--hairline);background:rgba(203,160,90,0.05);}
+  .cal-cell.has-record:active{transform:scale(0.94);}
+  .cal-cell .cal-dot{width:6px;height:6px;border-radius:50%;}
+  .cal-cell.today{box-shadow:0 0 0 1px var(--gold) inset;font-weight:700;}
+
+  .day-detail-body{display:flex;flex-direction:column;gap:14px;}
+  .day-detail-color-row{display:flex;align-items:center;gap:8px;font-size:0.84rem;color:var(--ink);}
+  .day-detail-dot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);flex-shrink:0;}
+  .day-detail-num-label{font-size:0.62rem;letter-spacing:0.14em;color:var(--mist);margin-bottom:4px;}
+  .day-detail-num{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:600;color:var(--ink);}
+  .day-detail-wish{
+    font-family:"標楷體","DFKai-SB","BiauKai","STKaiti","KaiTi",serif;
+    font-size:0.98rem;line-height:1.7;color:var(--ink);
+    padding:10px 12px;border:1px solid var(--hairline);border-radius:4px;background:rgba(91,114,128,0.05);
+  }
+  .day-detail-guidance-item{border-top:1px solid var(--hairline);padding-top:10px;}
+  .day-detail-guidance-tag{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;color:var(--gold);margin-bottom:4px;}
+  .day-detail-guidance-text{
+    font-family:"標楷體","DFKai-SB","BiauKai","STKaiti","KaiTi",serif;
+    font-size:0.92rem;line-height:1.6;color:var(--ink);
+  }
+  .day-detail-empty{font-size:0.8rem;color:var(--mist);text-align:center;padding:10px 0;}
+
   .reset-link{font-size:0.68rem;color:#B7554A;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font-family:'Noto Sans TC',sans-serif;margin-top:14px;display:block;}
 
   /* 分享用離畫面卡片(9:16) */
@@ -456,8 +551,22 @@
 <div id="meteor-field"></div>
 <div id="star-burst" class="star-burst"></div>
 
-<div id="dashboard-btn" class="icon-btn">
-  <svg viewBox="0 0 24 24" fill="none" stroke="#CBA05A" stroke-width="1.6"><path d="M4 19V10M11 19V5M18 19V13"/></svg>
+<div id="dashboard-btn" class="icon-btn" title="運勢回測">
+  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M4 19V10M11 19V5M18 19V13"/></svg>
+</div>
+<div id="theme-btn" class="icon-btn" title="切換主題">
+  <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+</div>
+<div id="calendar-btn" class="icon-btn" title="歷史運勢日曆">
+  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.5" y="5" width="17" height="15" rx="1.6"/>
+    <path d="M3.5 9.5h17M8 3v3M16 3v3"/>
+  </svg>
+</div>
+<div id="favorites-btn" class="icon-btn" title="我的收藏">
+  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20s-7-4.6-9.3-9C1.2 7.8 2.6 4.5 6 4c2-.3 3.7.8 4.5 2.3C11.3 4.8 13 3.7 15 4c3.4.5 4.8 3.8 3.3 7-2.3 4.4-9.3 9-9.3 9Z"/>
+  </svg>
 </div>
 
 <div class="stage">
@@ -596,7 +705,14 @@
   </div>
   <div class="guidance-answer" id="guidance-answer">
     <div class="guidance-answer-inner">
-      <div class="guidance-answer-tag" id="guidance-answer-tag">學業指引</div>
+      <div class="guidance-answer-head">
+        <div class="guidance-answer-tag" id="guidance-answer-tag">學業指引</div>
+        <button class="fav-btn" id="fav-btn" title="收藏這句話" aria-label="收藏這句話">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20s-7-4.6-9.3-9C1.2 7.8 2.6 4.5 6 4c2-.3 3.7.8 4.5 2.3C11.3 4.8 13 3.7 15 4c3.4.5 4.8 3.8 3.3 7-2.3 4.4-9.3 9-9.3 9Z"/>
+          </svg>
+        </button>
+      </div>
       <div class="guidance-answer-text" id="guidance-answer-text"></div>
     </div>
   </div>
@@ -640,6 +756,44 @@
     <p class="bead-hint" id="bead-hint">再抽 14 天集滿一輪能量</p>
 
     <button class="reset-link" id="reset-history-btn">清除本機紀錄</button>
+  </div>
+</div>
+
+<!-- 我的收藏 -->
+<div class="modal-overlay" id="favorites-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="favorites-close">✕</button>
+    <p class="modal-title">我的收藏</p>
+    <p class="modal-sub">曾經觸動你的四方指引語錄</p>
+    <div id="favorites-list"></div>
+  </div>
+</div>
+
+<!-- 歷史運勢日曆 -->
+<div class="modal-overlay" id="calendar-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="calendar-close">✕</button>
+    <p class="modal-title">歷史運勢日曆</p>
+    <p class="modal-sub">點選日期回顧當天的能量紀錄</p>
+
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="cal-prev">‹</button>
+      <span class="cal-month-label" id="cal-month-label">—</span>
+      <button class="cal-nav-btn" id="cal-next">›</button>
+    </div>
+    <div class="cal-weekdays">
+      <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- 單日詳情 -->
+<div class="modal-overlay" id="day-detail-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="day-detail-close">✕</button>
+    <p class="modal-title" id="day-detail-title">—</p>
+    <div class="day-detail-body" id="day-detail-body"></div>
   </div>
 </div>
 
@@ -698,6 +852,10 @@
   let guidanceToday = loadJSON('lb_guidance', null);
   // 靈能串珠：獨立於總歷史紀錄，只保存「目前這一輪」最多 14 顆珠子
   let cycleBeads = loadJSON('lb_cycle_beads', []);
+  // 語錄收藏：{ id, category, text, savedAt }[]，id = "分類::語錄內容" 避免重複收藏同一句
+  let favorites = loadJSON('lb_favorites', []);
+  // 歷史運勢日曆：{ "YYYY-MM-DD": { color:{name,hex}, num, isSSR, wish, guidance:{study?,work?,love?,wealth?} } }
+  let calendarData = loadJSON('lb_calendar', {});
 
   // ---------- DOM ----------
   const btn = document.getElementById('draw-btn');
@@ -714,6 +872,30 @@
   const starBurstEl = document.getElementById('star-burst');
   const progressFillEl = document.getElementById('progress-fill');
   const progressNumEl = document.getElementById('progress-num');
+
+  // ---------- 黑暗／明亮模式切換 ----------
+  const themeBtn = document.getElementById('theme-btn');
+  const themeIcon = document.getElementById('theme-icon');
+  const SUN_ICON = '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>';
+  const MOON_ICON = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>';
+
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    // 圖示顯示「切換到另一個主題」的提示：深色模式下顯示太陽（切到明亮），反之顯示月亮
+    themeIcon.innerHTML = theme === 'light' ? MOON_ICON : SUN_ICON;
+    try{ localStorage.setItem('lb_theme', theme); }catch(e){}
+  }
+  let currentTheme = (function(){
+    try{ return localStorage.getItem('lb_theme') === 'light' ? 'light' : 'dark'; }
+    catch(e){ return 'dark'; }
+  })();
+  applyTheme(currentTheme);
+
+  themeBtn.addEventListener('click', ()=>{
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(currentTheme);
+    if(navigator.vibrate) navigator.vibrate(15);
+  });
 
   // 讀取動畫總時長，需與 CSS 的 star-converge / core-grow / glow 動畫時序保持一致
   const LOAD_TOTAL_MS = 3300;
@@ -776,6 +958,7 @@
         const arr = await fetchGuidanceCategory(cat);
         guidanceToday[cat] = arr[Math.floor(Math.random()*arr.length)];
         saveJSON('lb_guidance', guidanceToday);
+        upsertCalendarGuidance(dateKey, cat, guidanceToday[cat]);
       }
 
       document.querySelectorAll('.g-tile').forEach(t=>t.classList.remove('active'));
@@ -784,7 +967,173 @@
       guidanceAnswerText.innerText = "「" + guidanceToday[cat] + "」";
       guidanceAnswer.classList.add('open');
       activeGuidanceCat = cat;
+      updateFavBtn(cat, guidanceToday[cat]);
     });
+  });
+
+  // ---------- 語錄收藏 ----------
+  const favBtn = document.getElementById('fav-btn');
+
+  function favId(cat, text){ return cat + '::' + text; }
+  function isFavorited(cat, text){ return favorites.some(f => f.id === favId(cat, text)); }
+  function updateFavBtn(cat, text){
+    favBtn.classList.toggle('active', !!(cat && text && isFavorited(cat, text)));
+  }
+
+  favBtn.addEventListener('click', ()=>{
+    if(!activeGuidanceCat) return;
+    const cat = activeGuidanceCat;
+    const text = guidanceToday[cat];
+    if(!text) return;
+    const id = favId(cat, text);
+    const idx = favorites.findIndex(f => f.id === id);
+    if(idx >= 0){
+      favorites.splice(idx, 1);
+    } else {
+      favorites.unshift({ id, category:cat, text, savedAt:dateKey });
+    }
+    saveJSON('lb_favorites', favorites);
+    updateFavBtn(cat, text);
+    if(navigator.vibrate) navigator.vibrate(20);
+  });
+
+  function renderFavorites(){
+    const listEl = document.getElementById('favorites-list');
+    if(favorites.length === 0){
+      listEl.innerHTML = '<p class="fav-empty">還沒有收藏的語錄，點擊四方指引卡片上的愛心試試看</p>';
+      return;
+    }
+    listEl.innerHTML = '';
+    favorites.forEach(f=>{
+      const card = document.createElement('div');
+      card.className = 'fav-card';
+      const top = document.createElement('div');
+      top.className = 'fav-card-top';
+      const tag = document.createElement('span');
+      tag.className = 'fav-card-tag';
+      tag.innerText = guidanceLabels[f.category] || f.category;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'fav-remove';
+      removeBtn.innerText = '移除';
+      removeBtn.addEventListener('click', ()=>{
+        favorites = favorites.filter(item => item.id !== f.id);
+        saveJSON('lb_favorites', favorites);
+        renderFavorites();
+        if(activeGuidanceCat) updateFavBtn(activeGuidanceCat, guidanceToday[activeGuidanceCat]);
+      });
+      top.appendChild(tag);
+      top.appendChild(removeBtn);
+      const textEl = document.createElement('div');
+      textEl.className = 'fav-card-text';
+      textEl.innerText = "「" + f.text + "」";
+      card.appendChild(top);
+      card.appendChild(textEl);
+      listEl.appendChild(card);
+    });
+  }
+
+  document.getElementById('favorites-btn').addEventListener('click', ()=>{
+    renderFavorites();
+    document.getElementById('favorites-overlay').classList.add('show');
+  });
+  document.getElementById('favorites-close').addEventListener('click', ()=>{
+    document.getElementById('favorites-overlay').classList.remove('show');
+  });
+
+  // ---------- 歷史運勢日曆 ----------
+  function upsertCalendarGuidance(dKey, cat, text){
+    const existing = calendarData[dKey] || {};
+    const guidance = Object.assign({}, existing.guidance || {}, { [cat]: text });
+    calendarData[dKey] = Object.assign({}, existing, { guidance });
+    saveJSON('lb_calendar', calendarData);
+  }
+  function upsertCalendarDraw(dKey, patch){
+    calendarData[dKey] = Object.assign({}, calendarData[dKey] || {}, patch);
+    saveJSON('lb_calendar', calendarData);
+  }
+
+  let calViewYear = year;
+  let calViewMonth = month; // 1-indexed
+
+  function renderCalendar(){
+    document.getElementById('cal-month-label').innerText = `${calViewYear}年${calViewMonth}月`;
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    const firstWeekday = new Date(calViewYear, calViewMonth - 1, 1).getDay();
+    const daysInMonth = new Date(calViewYear, calViewMonth, 0).getDate();
+
+    for(let i = 0; i < firstWeekday; i++){
+      const empty = document.createElement('div');
+      empty.className = 'cal-cell empty';
+      grid.appendChild(empty);
+    }
+    for(let d = 1; d <= daysInMonth; d++){
+      const dKey = `${calViewYear}-${String(calViewMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const record = calendarData[dKey];
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell' + (record ? ' has-record' : '') + (dKey === dateKey ? ' today' : '');
+
+      const numSpan = document.createElement('span');
+      numSpan.innerText = d;
+      cell.appendChild(numSpan);
+
+      if(record){
+        const dot = document.createElement('span');
+        dot.className = 'cal-dot';
+        dot.style.background = record.color ? record.color.hex : 'var(--gold)';
+        cell.appendChild(dot);
+        cell.addEventListener('click', ()=> openDayDetail(dKey, record));
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function openDayDetail(dKey, record){
+    document.getElementById('day-detail-title').innerText = dKey;
+    const body = document.getElementById('day-detail-body');
+    let html = '';
+
+    if(record.color){
+      html += `<div class="day-detail-color-row"><div class="day-detail-dot" style="background:${record.color.hex}"></div>幸運色：${record.color.name}${record.isSSR ? '（SSR）' : ''}</div>`;
+    }
+    if(typeof record.num !== 'undefined'){
+      html += `<div><div class="day-detail-num-label">幸運號碼</div><div class="day-detail-num">${record.num}</div></div>`;
+    }
+    if(record.wish){
+      html += `<div class="day-detail-wish">「${record.wish}」</div>`;
+    }
+    if(record.guidance){
+      Object.keys(record.guidance).forEach(cat=>{
+        html += `<div class="day-detail-guidance-item"><div class="day-detail-guidance-tag">${guidanceLabels[cat] || cat}</div><div class="day-detail-guidance-text">「${record.guidance[cat]}」</div></div>`;
+      });
+    }
+    if(!html) html = '<p class="day-detail-empty">這天沒有留下紀錄</p>';
+    body.innerHTML = html;
+    document.getElementById('day-detail-overlay').classList.add('show');
+  }
+
+  document.getElementById('calendar-btn').addEventListener('click', ()=>{
+    calViewYear = year;
+    calViewMonth = month;
+    renderCalendar();
+    document.getElementById('calendar-overlay').classList.add('show');
+  });
+  document.getElementById('calendar-close').addEventListener('click', ()=>{
+    document.getElementById('calendar-overlay').classList.remove('show');
+  });
+  document.getElementById('cal-prev').addEventListener('click', ()=>{
+    calViewMonth--;
+    if(calViewMonth < 1){ calViewMonth = 12; calViewYear--; }
+    renderCalendar();
+  });
+  document.getElementById('cal-next').addEventListener('click', ()=>{
+    calViewMonth++;
+    if(calViewMonth > 12){ calViewMonth = 1; calViewYear++; }
+    renderCalendar();
+  });
+  document.getElementById('day-detail-close').addEventListener('click', ()=>{
+    document.getElementById('day-detail-overlay').classList.remove('show');
   });
 
   // ============================================================
@@ -1000,6 +1349,13 @@
         history.push({ date: dateKey, colorName: newColor.name, colorHex: newColor.hex, num: newNum, isSSR });
         if(history.length > 120) history = history.slice(-120);
         saveJSON('lb_history', history);
+
+        upsertCalendarDraw(dateKey, {
+          color: { name: newColor.name, hex: newColor.hex },
+          num: newNum,
+          isSSR,
+          wish: newSentence.text
+        });
 
         if(cycleBeads.length < 14){
           cycleBeads.push({ date: dateKey, colorHex: newColor.hex, colorName: newColor.name, num: newNum, isSSR });
