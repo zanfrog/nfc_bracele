@@ -101,20 +101,73 @@
 
   .stage{position:relative;z-index:2;width:100%;max-width:340px;}
 
-  /* 右上/右上角功能圖示列 */
-  .icon-btn{
-    position:fixed;top:16px;z-index:6;
-    width:38px;height:38px;border-radius:50%;
+  /* ============================================
+     右上角「魔法陣」抽屜觸發鈕：抽籤結果揭曉後才會顯示
+     ============================================ */
+  .drawer-trigger{
+    position:fixed;top:16px;right:16px;z-index:6;
+    width:42px;height:42px;border-radius:50%;
     background:var(--icon-btn-bg);border:1px solid var(--hairline-light);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    display:none;align-items:center;justify-content:center;cursor:pointer;
     backdrop-filter:blur(6px);
-    transition:background 0.3s ease;
+    transition:background 0.3s ease, transform 0.2s ease;
+    opacity:0;transform:scale(0.6) rotate(-30deg);
   }
-  #dashboard-btn{right:16px;}
-  #theme-btn{right:64px;}
-  #calendar-btn{left:16px;}
-  #favorites-btn{left:64px;}
-  .icon-btn svg{width:18px;height:18px;}
+  .drawer-trigger.show{
+    display:flex;
+    animation:drawer-trigger-in 0.5s cubic-bezier(.2,.8,.3,1.1) forwards;
+  }
+  .drawer-trigger:active{transform:scale(0.92);}
+  .drawer-trigger svg{width:22px;height:22px;}
+  @keyframes drawer-trigger-in{
+    0%{opacity:0;transform:scale(0.6) rotate(-30deg);}
+    100%{opacity:1;transform:scale(1) rotate(0deg);}
+  }
+
+  /* 抽屜遮罩層 */
+  .drawer-overlay{
+    position:fixed;inset:0;z-index:29;
+    background:rgba(14,8,26,0.72);
+    opacity:0;pointer-events:none;
+    transition:opacity 0.3s ease;
+  }
+  .drawer-overlay.show{opacity:1;pointer-events:auto;}
+
+  /* 側邊抽屜本體：預設滑出畫面右側，開啟時滑入 */
+  .side-drawer{
+    position:fixed;top:0;right:0;bottom:0;z-index:30;
+    width:280px;max-width:82vw;
+    background:var(--paper);
+    border-left:1px solid rgba(203,160,90,0.5);
+    box-shadow:-14px 0 40px rgba(0,0,0,0.5);
+    transform:translateX(100%);
+    transition:transform 0.35s cubic-bezier(.2,.8,.3,1);
+    padding:22px 18px 30px;
+    overflow-y:auto;
+  }
+  .side-drawer.open{transform:translateX(0);}
+
+  .drawer-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--hairline);
+  }
+  .drawer-title{font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:0.16em;color:var(--ink);}
+  .drawer-close{background:none;border:none;font-size:1.15rem;color:var(--mist);cursor:pointer;line-height:1;}
+
+  .drawer-list{display:flex;flex-direction:column;gap:12px;}
+  .drawer-item{
+    display:flex;align-items:flex-start;gap:12px;width:100%;
+    background:rgba(203,160,90,0.05);border:1px solid var(--hairline);border-radius:8px;
+    padding:14px;cursor:pointer;text-align:left;font-family:'Noto Sans TC',sans-serif;
+    transition:border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  }
+  .drawer-item:active{transform:scale(0.98);}
+  .drawer-item:hover{border-color:var(--hairline-light);background:rgba(203,160,90,0.1);}
+  .drawer-item-icon{width:24px;height:24px;flex-shrink:0;color:var(--gold);margin-top:1px;}
+  .drawer-item-icon svg{width:100%;height:100%;display:block;}
+  .drawer-item-text{display:flex;flex-direction:column;gap:3px;}
+  .drawer-item-title{font-family:'Cinzel',serif;font-size:0.76rem;letter-spacing:0.05em;color:var(--ink);font-weight:600;}
+  .drawer-item-desc{font-size:0.68rem;line-height:1.55;color:var(--mist);}
 
   .brandbar{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 18px;}
   .brandbar .rule-row{display:flex;align-items:center;gap:8px;}
@@ -551,22 +604,67 @@
 <div id="meteor-field"></div>
 <div id="star-burst" class="star-burst"></div>
 
-<div id="dashboard-btn" class="icon-btn" title="運勢回測">
-  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M4 19V10M11 19V5M18 19V13"/></svg>
-</div>
-<div id="theme-btn" class="icon-btn" title="切換主題">
-  <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
-</div>
-<div id="calendar-btn" class="icon-btn" title="歷史運勢日曆">
-  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3.5" y="5" width="17" height="15" rx="1.6"/>
-    <path d="M3.5 9.5h17M8 3v3M16 3v3"/>
+<div id="drawer-trigger" class="drawer-trigger" title="秘寶匣">
+  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.4"/>
+    <circle cx="12" cy="12" r="6.4"/>
+    <path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6M5.1 5.1l1.8 1.8M17.1 17.1l1.8 1.8M5.1 18.9l1.8-1.8M17.1 6.9l1.8-1.8"/>
+    <path d="M12 6 15 12 12 18 9 12Z"/>
   </svg>
 </div>
-<div id="favorites-btn" class="icon-btn" title="我的收藏">
-  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 20s-7-4.6-9.3-9C1.2 7.8 2.6 4.5 6 4c2-.3 3.7.8 4.5 2.3C11.3 4.8 13 3.7 15 4c3.4.5 4.8 3.8 3.3 7-2.3 4.4-9.3 9-9.3 9Z"/>
-  </svg>
+
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<div class="side-drawer" id="side-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">✦ 秘寶匣 ✦</span>
+    <button class="drawer-close" id="drawer-close">✕</button>
+  </div>
+  <div class="drawer-list">
+    <button class="drawer-item" id="drawer-calendar-btn">
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3.5" y="5" width="17" height="15" rx="1.6"/>
+          <path d="M3.5 9.5h17M8 3v3M16 3v3"/>
+        </svg>
+      </span>
+      <span class="drawer-item-text">
+        <span class="drawer-item-title">歷史運勢日曆</span>
+        <span class="drawer-item-desc">翻閱過去的每一天，重溫曾經降臨的幸運色與指引</span>
+      </span>
+    </button>
+
+    <button class="drawer-item" id="drawer-favorites-btn">
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20s-7-4.6-9.3-9C1.2 7.8 2.6 4.5 6 4c2-.3 3.7.8 4.5 2.3C11.3 4.8 13 3.7 15 4c3.4.5 4.8 3.8 3.3 7-2.3 4.4-9.3 9-9.3 9Z"/>
+        </svg>
+      </span>
+      <span class="drawer-item-text">
+        <span class="drawer-item-title">我的收藏</span>
+        <span class="drawer-item-desc">集中收藏曾經觸動你心的鼓勵話語，隨時回來重讀</span>
+      </span>
+    </button>
+
+    <button class="drawer-item" id="drawer-theme-btn">
+      <span class="drawer-item-icon">
+        <svg id="drawer-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </span>
+      <span class="drawer-item-text">
+        <span class="drawer-item-title">切換主題</span>
+        <span class="drawer-item-desc">在深色神秘風與明亮溫暖風之間，切換此刻的心境</span>
+      </span>
+    </button>
+
+    <button class="drawer-item" id="drawer-dashboard-btn">
+      <span class="drawer-item-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V10M11 19V5M18 19V13"/></svg>
+      </span>
+      <span class="drawer-item-text">
+        <span class="drawer-item-title">運勢回測</span>
+        <span class="drawer-item-desc">檢視累積抽籤足跡，以及靈能串珠的沉澱進度</span>
+      </span>
+    </button>
+  </div>
 </div>
 
 <div class="stage">
@@ -874,8 +972,8 @@
   const progressNumEl = document.getElementById('progress-num');
 
   // ---------- 黑暗／明亮模式切換 ----------
-  const themeBtn = document.getElementById('theme-btn');
-  const themeIcon = document.getElementById('theme-icon');
+  const themeBtn = document.getElementById('drawer-theme-btn');
+  const themeIcon = document.getElementById('drawer-theme-icon');
   const SUN_ICON = '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>';
   const MOON_ICON = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>';
 
@@ -896,6 +994,28 @@
     applyTheme(currentTheme);
     if(navigator.vibrate) navigator.vibrate(15);
   });
+
+  // ---------- 右上角「魔法陣」側邊抽屜 ----------
+  const drawerTrigger = document.getElementById('drawer-trigger');
+  const drawerOverlay = document.getElementById('drawer-overlay');
+  const sideDrawer = document.getElementById('side-drawer');
+
+  function openDrawer(){
+    drawerOverlay.classList.add('show');
+    sideDrawer.classList.add('open');
+  }
+  function closeDrawer(){
+    drawerOverlay.classList.remove('show');
+    sideDrawer.classList.remove('open');
+  }
+  // 抽屜觸發鈕只在抽籤結果揭曉後才會出現，初始頁面（尚未抽籤）不顯示
+  function revealDrawerTrigger(){
+    drawerTrigger.classList.add('show');
+  }
+
+  drawerTrigger.addEventListener('click', openDrawer);
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
 
   // 讀取動畫總時長，需與 CSS 的 star-converge / core-grow / glow 動畫時序保持一致
   const LOAD_TOTAL_MS = 3300;
@@ -1032,7 +1152,8 @@
     });
   }
 
-  document.getElementById('favorites-btn').addEventListener('click', ()=>{
+  document.getElementById('drawer-favorites-btn').addEventListener('click', ()=>{
+    closeDrawer();
     renderFavorites();
     document.getElementById('favorites-overlay').classList.add('show');
   });
@@ -1113,7 +1234,8 @@
     document.getElementById('day-detail-overlay').classList.add('show');
   }
 
-  document.getElementById('calendar-btn').addEventListener('click', ()=>{
+  document.getElementById('drawer-calendar-btn').addEventListener('click', ()=>{
+    closeDrawer();
     calViewYear = year;
     calViewMonth = month;
     renderCalendar();
@@ -1410,6 +1532,7 @@
 
     resultContainer.classList.add('show');
     if(alreadyDrawnToday) redrawNote.style.display = 'block';
+    revealDrawerTrigger();
 
     if(luckyData.isSSR){
       specTag.innerText = '天選';
@@ -1478,7 +1601,8 @@
   });
 
   // ---------- 數據儀表板 ----------
-  document.getElementById('dashboard-btn').addEventListener('click', ()=>{
+  document.getElementById('drawer-dashboard-btn').addEventListener('click', ()=>{
+    closeDrawer();
     renderDashboard();
     dashboardOverlay.classList.add('show');
   });
