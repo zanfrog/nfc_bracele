@@ -181,6 +181,7 @@
   .milestone-widget{
     position:relative;z-index:2;width:100%;max-width:300px;margin:0 auto 16px;
     display:flex;flex-direction:column;align-items:center;gap:8px;
+    cursor:pointer;
   }
   .milestone-edit-btn{
     position:absolute;top:-4px;right:6px;width:24px;height:24px;border-radius:50%;
@@ -1125,20 +1126,17 @@
   // 歷史運勢日曆：{ "YYYY-MM-DD": { color:{name,hex}, num, isSSR, wish, guidance:{study?,work?,love?,wealth?} } }
   let calendarData = loadJSON('lb_calendar', {});
 
-  // 里程碑倒數蓄能：{ name, targetDate:"YYYY-MM-DD", energyDates: string[] }
+  // 里程碑倒數蓄能：{ name, targetDate:"YYYY-MM-DD"|null, energyDates: string[] }
+  // 尚未設定目標時 name/targetDate 皆為 null，UI 會顯示邀請語句而非隨機倒數
   let milestone = loadJSON('lb_milestone', null);
   if(!milestone){
-    const dummyTarget = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    milestone = {
-      name: '量化資產配置論文初稿死線',
-      targetDate: `${dummyTarget.getFullYear()}-${String(dummyTarget.getMonth()+1).padStart(2,'0')}-${String(dummyTarget.getDate()).padStart(2,'0')}`,
-      energyDates: []
-    };
+    milestone = { name: null, targetDate: null, energyDates: [] };
     saveJSON('lb_milestone', milestone);
   }
   if(!Array.isArray(milestone.energyDates)) milestone.energyDates = [];
 
   function daysUntil(targetDateStr){
+    if(!targetDateStr) return 0;
     const target = new Date(targetDateStr + 'T00:00:00');
     const today = new Date(dateKey + 'T00:00:00');
     return Math.round((target - today) / (1000 * 60 * 60 * 24));
@@ -1215,19 +1213,22 @@
   const milestoneOrbitCoreEl = document.getElementById('milestone-orbit-core');
 
   function renderMilestoneWidget(){
-    const diff = daysUntil(milestone.targetDate);
-    if(diff > 0){
+    const hasGoal = !!(milestone.name && milestone.targetDate);
+    const diff = hasGoal ? daysUntil(milestone.targetDate) : 0;
+
+    if(!hasGoal || diff < 0){
+      // 尚未設定目標，或舊目標已經過去但還沒有立下新的約定
+      milestoneDaysNumEl.innerText = '0';
+      milestoneDaysUnitEl.innerText = 'DAYS';
+      milestoneTextEl.innerText = '✦ 所有的奇蹟都需要起點，輕觸此處，為自己立下一個約定 ✦';
+    } else if(diff > 0){
       milestoneDaysNumEl.innerText = diff;
       milestoneDaysUnitEl.innerText = 'DAYS';
       milestoneTextEl.innerText = `✦ 距離「${milestone.name}」降臨還有 ${diff} 晝夜 ✦`;
-    } else if(diff === 0){
+    } else {
       milestoneDaysNumEl.innerText = '✦';
       milestoneDaysUnitEl.innerText = 'TODAY';
       milestoneTextEl.innerText = `✦ 今日，「${milestone.name}」的時刻已然降臨 ✦`;
-    } else {
-      milestoneDaysNumEl.innerText = '✓';
-      milestoneDaysUnitEl.innerText = 'DONE';
-      milestoneTextEl.innerText = `✦「${milestone.name}」的旅程已經圓滿 ✦`;
     }
     milestoneEnergyNoteEl.innerText = milestone.energyDates.length > 0
       ? `已持續注入能量 ${milestone.energyDates.length} 天`
@@ -1237,11 +1238,17 @@
 
   // 目標設定表單
   const milestoneEditOverlay = document.getElementById('milestone-edit-overlay');
-  document.getElementById('milestone-edit-btn').addEventListener('click', ()=>{
-    document.getElementById('milestone-name-input').value = milestone.name;
-    document.getElementById('milestone-date-input').value = milestone.targetDate;
+  function openMilestoneEdit(){
+    document.getElementById('milestone-name-input').value = milestone.name || '';
+    document.getElementById('milestone-date-input').value = milestone.targetDate || '';
     milestoneEditOverlay.classList.add('show');
+  }
+  document.getElementById('milestone-edit-btn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    openMilestoneEdit();
   });
+  // 「輕觸此處」：邀請語句與星軌本身也可以直接點擊開啟設定表單
+  document.getElementById('milestone-widget').addEventListener('click', openMilestoneEdit);
   document.getElementById('milestone-edit-close').addEventListener('click', ()=>{
     milestoneEditOverlay.classList.remove('show');
   });
