@@ -175,6 +175,130 @@
   .brandbar span.brand-name{font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.22em;color:var(--header-text);font-weight:600;white-space:nowrap;}
   .brandbar span.brand-sub{font-family:'Cinzel',serif;font-size:0.56rem;letter-spacing:0.32em;color:var(--gold);opacity:0.8;}
 
+  /* ============================================
+     里程碑倒數蓄能 (Milestone Countdown)
+     ============================================ */
+  .milestone-widget{
+    position:relative;z-index:2;width:100%;max-width:300px;margin:0 auto 16px;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .milestone-edit-btn{
+    position:absolute;top:-4px;right:6px;width:24px;height:24px;border-radius:50%;
+    background:rgba(203,160,90,0.12);border:1px solid var(--hairline-light);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);
+  }
+  .milestone-edit-btn svg{width:12px;height:12px;}
+
+  .milestone-orbit{position:relative;width:76px;height:76px;}
+  .milestone-orbit-ring{position:absolute;inset:0;border-radius:50%;border:1px dashed var(--hairline-light);}
+  .milestone-orbit-spin{position:absolute;inset:0;animation:orbit-spin 9s linear infinite;}
+  .milestone-orbit-star{
+    position:absolute;top:-3px;left:50%;width:7px;height:7px;margin-left:-3.5px;
+    border-radius:50%;background:var(--gold);box-shadow:0 0 8px 2px rgba(203,160,90,0.85);
+  }
+  @keyframes orbit-spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .milestone-orbit-core{
+    position:absolute;inset:8px;border-radius:50%;background:rgba(203,160,90,0.06);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border:1px solid var(--hairline);
+  }
+  .milestone-days-num{font-family:'Cinzel',serif;font-size:1.28rem;font-weight:700;color:var(--ink);line-height:1;}
+  .milestone-days-unit{font-family:'Cinzel',serif;font-size:0.48rem;letter-spacing:0.16em;color:var(--mist);margin-top:2px;}
+  .milestone-orbit-core.pulse-once{animation:orbit-core-pulse 0.9s ease;}
+  @keyframes orbit-core-pulse{
+    0%{box-shadow:0 0 0 0 rgba(203,160,90,0.6);}
+    40%{box-shadow:0 0 14px 6px rgba(203,160,90,0.5);}
+    100%{box-shadow:0 0 0 0 rgba(203,160,90,0);}
+  }
+
+  .milestone-text{
+    font-family:'Cinzel',serif;font-size:0.66rem;letter-spacing:0.04em;
+    color:var(--gold);text-align:center;line-height:1.6;
+    text-shadow:0 0 8px rgba(203,160,90,0.35);
+  }
+  .milestone-energy-note{font-size:0.6rem;letter-spacing:0.04em;color:var(--mist);min-height:14px;}
+
+  /* 每日蓄能：從抽籤按鈕飛向星軌的金色光點 */
+  .energy-spark{
+    position:fixed;z-index:40;width:6px;height:6px;border-radius:50%;
+    background:#FFF3D0;box-shadow:0 0 10px 3px rgba(203,160,90,0.85);
+    transform:translate(-50%,-50%);pointer-events:none;
+    animation:energy-fly 900ms cubic-bezier(.3,.6,.3,1) forwards;
+  }
+  @keyframes energy-fly{
+    0%{transform:translate(-50%,-50%) translate(0,0) scale(1);opacity:1;}
+    70%{opacity:1;}
+    100%{transform:translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(0.3);opacity:0;}
+  }
+
+  /* 目標設定表單 */
+  .milestone-form{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+  .milestone-form-label{font-size:0.66rem;letter-spacing:0.08em;color:var(--mist);margin-top:10px;}
+  .milestone-input{
+    font-family:'Noto Sans TC',sans-serif;font-size:0.88rem;color:var(--ink);
+    background:rgba(203,160,90,0.05);border:1px solid var(--hairline);border-radius:6px;
+    padding:9px 10px;outline:none;width:100%;
+  }
+  .milestone-input:focus{border-color:var(--gold);}
+  .milestone-save-btn{
+    margin-top:18px;font-family:'Cinzel',serif;font-size:0.76rem;letter-spacing:0.08em;
+    color:var(--charcoal);background:linear-gradient(90deg, var(--gold), #EAD48F);
+    border:none;border-radius:20px;padding:11px 20px;cursor:pointer;width:100%;
+  }
+
+  /* 達成日的滿級祝福：全螢幕特效 */
+  .milestone-overlay{
+    position:fixed;inset:0;z-index:50;
+    background:radial-gradient(circle at 50% 40%, rgba(255,238,190,0.18), rgba(14,8,26,0.95) 72%);
+    display:flex;align-items:center;justify-content:center;padding:26px;
+    opacity:0;pointer-events:none;transition:opacity 0.5s ease;
+  }
+  .milestone-overlay.show{opacity:1;pointer-events:auto;}
+  .milestone-burst-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .milestone-spark{
+    position:absolute;width:5px;height:5px;border-radius:50%;
+    background:#FFF3D0;box-shadow:0 0 10px 3px rgba(255,238,190,0.9);
+    opacity:0;animation:milestone-spark-fly 1400ms ease-out forwards;
+  }
+  @keyframes milestone-spark-fly{
+    0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}
+    100%{opacity:0;transform:translate(-50%,-50%) translate(var(--tx), var(--ty)) scale(0.2);}
+  }
+  .milestone-meteor{
+    position:absolute;top:-10%;width:2px;height:120px;
+    background:linear-gradient(180deg, rgba(255,238,190,0), #FFE9AE);
+    opacity:0;transform:rotate(28deg);animation:milestone-meteor-fall linear infinite;
+  }
+  @keyframes milestone-meteor-fall{
+    0%{opacity:0;transform:translateY(-10%) rotate(28deg);}
+    8%{opacity:1;} 85%{opacity:0.9;}
+    100%{opacity:0;transform:translateY(115vh) rotate(28deg);}
+  }
+  .milestone-message-box{
+    position:relative;z-index:2;
+    background:var(--paper);border:1px solid rgba(203,160,90,0.55);border-radius:10px;
+    padding:38px 30px;max-width:320px;text-align:center;
+    transform:translateY(16px) scale(0.96);opacity:0;
+    transition:transform 0.5s ease, opacity 0.5s ease;
+    box-shadow:0 0 40px rgba(203,160,90,0.35);
+  }
+  .milestone-overlay.show .milestone-message-box{transform:translateY(0) scale(1);opacity:1;}
+  .milestone-mark{font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.34em;color:var(--gold);margin-bottom:16px;}
+  .milestone-goal-name{
+    font-family:'Cinzel',serif;font-size:0.9rem;letter-spacing:0.03em;color:var(--ink);font-weight:700;
+    margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--hairline);
+  }
+  .milestone-blessing-text{
+    font-family:"標楷體","DFKai-SB","BiauKai","STKaiti","KaiTi",serif;
+    font-size:1.06rem;line-height:1.9;color:var(--ink);margin-bottom:22px;
+  }
+  .milestone-close-btn{
+    font-family:'Cinzel',serif;font-size:0.74rem;letter-spacing:0.08em;color:var(--charcoal);
+    background:linear-gradient(90deg, var(--gold), #EAD48F);
+    border:none;border-radius:20px;padding:11px 26px;cursor:pointer;
+  }
+
   .panel{background:var(--paper);border:1px solid rgba(203,160,90,0.35);border-radius:8px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(203,160,90,0.12), 0 18px 40px rgba(0,0,0,0.45);}
   .panel.ssr-glow{box-shadow:0 0 0 2px var(--ssr), 0 0 28px rgba(185,140,224,0.65);}
   .panel .corner-tl, .panel .corner-tr, .panel .corner-bl, .panel .corner-br{
@@ -677,6 +801,25 @@
     <span class="brand-sub">M Y S T I C&nbsp; E N E R G Y</span>
   </div>
 
+  <div class="milestone-widget" id="milestone-widget">
+    <button class="milestone-edit-btn" id="milestone-edit-btn" title="編輯目標">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 20l4.5-1 10-10a1.8 1.8 0 0 0 0-2.5l-1-1a1.8 1.8 0 0 0-2.5 0l-10 10L4 20Z"/>
+        <path d="M13.5 6.5l3 3"/>
+      </svg>
+    </button>
+    <div class="milestone-orbit">
+      <div class="milestone-orbit-ring"></div>
+      <div class="milestone-orbit-spin"><div class="milestone-orbit-star"></div></div>
+      <div class="milestone-orbit-core" id="milestone-orbit-core">
+        <div class="milestone-days-num" id="milestone-days-num">-</div>
+        <div class="milestone-days-unit" id="milestone-days-unit">DAYS</div>
+      </div>
+    </div>
+    <p class="milestone-text" id="milestone-text">✦ 正在連結你的里程碑 ✦</p>
+    <p class="milestone-energy-note" id="milestone-energy-note"></p>
+  </div>
+
   <div class="panel" id="main-panel">
     <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
     <div class="panel-head">
@@ -903,6 +1046,33 @@
   </div>
 </div>
 
+<!-- 里程碑目標設定 -->
+<div class="modal-overlay" id="milestone-edit-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="milestone-edit-close">✕</button>
+    <p class="modal-title">設定里程碑目標</p>
+    <p class="modal-sub">為你的蓄能旅程，設下一個值得奔赴的日子</p>
+    <div class="milestone-form">
+      <label class="milestone-form-label">目標名稱</label>
+      <input type="text" id="milestone-name-input" class="milestone-input" placeholder="例如：多益 800 分檢定" maxlength="40">
+      <label class="milestone-form-label">目標日期</label>
+      <input type="date" id="milestone-date-input" class="milestone-input">
+      <button class="milestone-save-btn" id="milestone-save-btn">✦ 設下這個約定 ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- 達成日的滿級祝福：全螢幕特效 -->
+<div class="milestone-overlay" id="milestone-overlay">
+  <div class="milestone-burst-layer" id="milestone-burst-layer"></div>
+  <div class="milestone-message-box">
+    <div class="milestone-mark">✦ ✦ ✦</div>
+    <div class="milestone-goal-name" id="milestone-goal-name">—</div>
+    <div class="milestone-blessing-text">星辰已為你鋪好道路，帶著這段時間累積的靈能，勇敢上場吧！</div>
+    <button class="milestone-close-btn" id="milestone-close-btn">✦ 帶著祝福，啟程 ✦</button>
+  </div>
+</div>
+
 <!-- 分享用離畫面 9:16 樣板 -->
 <div id="share-template">
   <div class="st-badge">
@@ -954,6 +1124,26 @@
   let favorites = loadJSON('lb_favorites', []);
   // 歷史運勢日曆：{ "YYYY-MM-DD": { color:{name,hex}, num, isSSR, wish, guidance:{study?,work?,love?,wealth?} } }
   let calendarData = loadJSON('lb_calendar', {});
+
+  // 里程碑倒數蓄能：{ name, targetDate:"YYYY-MM-DD", energyDates: string[] }
+  let milestone = loadJSON('lb_milestone', null);
+  if(!milestone){
+    const dummyTarget = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    milestone = {
+      name: '量化資產配置論文初稿死線',
+      targetDate: `${dummyTarget.getFullYear()}-${String(dummyTarget.getMonth()+1).padStart(2,'0')}-${String(dummyTarget.getDate()).padStart(2,'0')}`,
+      energyDates: []
+    };
+    saveJSON('lb_milestone', milestone);
+  }
+  if(!Array.isArray(milestone.energyDates)) milestone.energyDates = [];
+
+  function daysUntil(targetDateStr){
+    const target = new Date(targetDateStr + 'T00:00:00');
+    const today = new Date(dateKey + 'T00:00:00');
+    return Math.round((target - today) / (1000 * 60 * 60 * 24));
+  }
+  let isMilestoneDay = milestone.targetDate === dateKey;
 
   // ---------- DOM ----------
   const btn = document.getElementById('draw-btn');
@@ -1016,6 +1206,119 @@
   drawerTrigger.addEventListener('click', openDrawer);
   document.getElementById('drawer-close').addEventListener('click', closeDrawer);
   drawerOverlay.addEventListener('click', closeDrawer);
+
+  // ---------- 里程碑倒數蓄能 ----------
+  const milestoneDaysNumEl = document.getElementById('milestone-days-num');
+  const milestoneDaysUnitEl = document.getElementById('milestone-days-unit');
+  const milestoneTextEl = document.getElementById('milestone-text');
+  const milestoneEnergyNoteEl = document.getElementById('milestone-energy-note');
+  const milestoneOrbitCoreEl = document.getElementById('milestone-orbit-core');
+
+  function renderMilestoneWidget(){
+    const diff = daysUntil(milestone.targetDate);
+    if(diff > 0){
+      milestoneDaysNumEl.innerText = diff;
+      milestoneDaysUnitEl.innerText = 'DAYS';
+      milestoneTextEl.innerText = `✦ 距離「${milestone.name}」降臨還有 ${diff} 晝夜 ✦`;
+    } else if(diff === 0){
+      milestoneDaysNumEl.innerText = '✦';
+      milestoneDaysUnitEl.innerText = 'TODAY';
+      milestoneTextEl.innerText = `✦ 今日，「${milestone.name}」的時刻已然降臨 ✦`;
+    } else {
+      milestoneDaysNumEl.innerText = '✓';
+      milestoneDaysUnitEl.innerText = 'DONE';
+      milestoneTextEl.innerText = `✦「${milestone.name}」的旅程已經圓滿 ✦`;
+    }
+    milestoneEnergyNoteEl.innerText = milestone.energyDates.length > 0
+      ? `已持續注入能量 ${milestone.energyDates.length} 天`
+      : '';
+  }
+  renderMilestoneWidget();
+
+  // 目標設定表單
+  const milestoneEditOverlay = document.getElementById('milestone-edit-overlay');
+  document.getElementById('milestone-edit-btn').addEventListener('click', ()=>{
+    document.getElementById('milestone-name-input').value = milestone.name;
+    document.getElementById('milestone-date-input').value = milestone.targetDate;
+    milestoneEditOverlay.classList.add('show');
+  });
+  document.getElementById('milestone-edit-close').addEventListener('click', ()=>{
+    milestoneEditOverlay.classList.remove('show');
+  });
+  document.getElementById('milestone-save-btn').addEventListener('click', ()=>{
+    const nameVal = document.getElementById('milestone-name-input').value.trim();
+    const dateVal = document.getElementById('milestone-date-input').value;
+    if(!nameVal || !dateVal) return;
+    milestone.name = nameVal;
+    milestone.targetDate = dateVal;
+    saveJSON('lb_milestone', milestone);
+    isMilestoneDay = milestone.targetDate === dateKey;
+    renderMilestoneWidget();
+    milestoneEditOverlay.classList.remove('show');
+  });
+
+  // 每日蓄能儀式：從抽籤按鈕飛出一絲金光，飄向倒數星軌
+  function spawnEnergyFlight(){
+    if(!milestoneOrbitCoreEl) return;
+    const startRect = btn.getBoundingClientRect();
+    const endRect = milestoneOrbitCoreEl.getBoundingClientRect();
+    const startX = startRect.left + startRect.width / 2;
+    const startY = startRect.top + startRect.height / 2;
+    const endX = endRect.left + endRect.width / 2;
+    const endY = endRect.top + endRect.height / 2;
+
+    const spark = document.createElement('div');
+    spark.className = 'energy-spark';
+    spark.style.left = startX + 'px';
+    spark.style.top = startY + 'px';
+    spark.style.setProperty('--dx', (endX - startX) + 'px');
+    spark.style.setProperty('--dy', (endY - startY) + 'px');
+    document.body.appendChild(spark);
+    setTimeout(()=> spark.remove(), 950);
+
+    milestoneOrbitCoreEl.classList.add('pulse-once');
+    setTimeout(()=> milestoneOrbitCoreEl.classList.remove('pulse-once'), 900);
+  }
+
+  // 達成日的滿級祝福：全螢幕金色星辰爆發 + 專屬祝福語
+  function spawnMilestoneMeteors(){
+    const layer = document.getElementById('milestone-burst-layer');
+    for(let i = 0; i < 24; i++){
+      const m = document.createElement('div');
+      m.className = 'milestone-meteor';
+      m.style.left = (Math.random()*100) + '%';
+      m.style.animationDuration = (1 + Math.random()*1.3) + 's';
+      m.style.animationDelay = (Math.random()*2) + 's';
+      layer.appendChild(m);
+    }
+  }
+  function spawnMilestoneSparks(){
+    const layer = document.getElementById('milestone-burst-layer');
+    for(let i = 0; i < 40; i++){
+      const s = document.createElement('div');
+      s.className = 'milestone-spark';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 160;
+      s.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+      s.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+      s.style.left = (40 + Math.random()*20) + '%';
+      s.style.top = (35 + Math.random()*20) + '%';
+      s.style.animationDelay = (Math.random()*300) + 'ms';
+      layer.appendChild(s);
+    }
+  }
+  function triggerMilestoneCelebration(){
+    const layer = document.getElementById('milestone-burst-layer');
+    layer.innerHTML = '';
+    document.getElementById('milestone-goal-name').innerText = milestone.name;
+    spawnMilestoneMeteors();
+    spawnMilestoneSparks();
+    document.getElementById('milestone-overlay').classList.add('show');
+  }
+  document.getElementById('milestone-close-btn').addEventListener('click', ()=>{
+    document.getElementById('milestone-overlay').classList.remove('show');
+    setTimeout(()=>{ document.getElementById('milestone-burst-layer').innerHTML = ''; }, 400);
+  });
 
   // 讀取動畫總時長，需與 CSS 的 star-converge / core-grow / glow 動畫時序保持一致
   const LOAD_TOTAL_MS = 3300;
@@ -1428,11 +1731,29 @@
   btn.addEventListener('click', async function(e){
     if(navigator.vibrate) navigator.vibrate(200);
     spawnRipple(e);
+
+    // 達成日的滿級祝福：完全覆蓋掉一般的抽籤結果
+    if(isMilestoneDay){
+      if(navigator.vibrate) navigator.vibrate([30,20,30,20,80]);
+      triggerMilestoneCelebration();
+      return;
+    }
+
     btn.style.display = 'none';
 
     const skipHop = alreadyDrawnToday;
     let progressCtrl = null;
     const labelTimers = [];
+
+    // 每日蓄能儀式：只在今天「第一次」真正抽籤時飛出金光，回顧舊結果不重複觸發
+    if(!skipHop){
+      spawnEnergyFlight();
+      if(!milestone.energyDates.includes(dateKey)){
+        milestone.energyDates.push(dateKey);
+        saveJSON('lb_milestone', milestone);
+        renderMilestoneWidget();
+      }
+    }
 
     if(!skipHop){
       resetLoadingVisuals();
